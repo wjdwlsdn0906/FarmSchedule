@@ -43,7 +43,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:gravity="center"
-                android:text="팜스"
+                android:text="공지사항"
                 android:textColor="#ffffff"
                 android:textSize="18sp"/>
 
@@ -58,8 +58,8 @@
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:gravity="center"
-                android:text="글쓰기"
-                android:textSize="18sp"
+                android:text="V"
+                android:textSize="20sp"
                 android:textColor="#ffffff"/>
 
         </LinearLayout>
