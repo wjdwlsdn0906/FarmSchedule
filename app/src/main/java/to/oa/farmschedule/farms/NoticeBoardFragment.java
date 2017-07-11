@@ -46,9 +46,12 @@ public class NoticeBoardFragment extends Fragment {
     private static final String TAG_CONTENT ="content";
 
     private View layout;
-    private LinearLayout back;
+    private LinearLayout back, line;
     private ListView listview;
     private ListViewAdapter adapter;
+    private TextView title, content;
+    private boolean notice_change = true;
+    private String notice_no = "";
 
     ArrayList<HashMap<String, String>> mArrayList;
     String mJsonString;
@@ -60,6 +63,12 @@ public class NoticeBoardFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        try {
+            notice_no = (String) getArguments().getString("no");
+        } catch (Exception e) {
+            notice_no = "";
+        }
 
         mArrayList = new ArrayList<>();
         GetData task = new GetData();
@@ -87,18 +96,30 @@ public class NoticeBoardFragment extends Fragment {
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                FragmentManager fm = getFragmentManager();
-                FragmentTransaction fragmentTransaction = fm.beginTransaction();
-                NoticeContentFragment fragment = new NoticeContentFragment();
+                line = (LinearLayout) view.findViewById(R.id.line);
+                content = (TextView) view.findViewById(R.id.content);
 
-                HashMap<String,String> outputHashMap = mArrayList.get(i);
-                Bundle bundle = new Bundle();
-                bundle.putString("title", outputHashMap.get("title"));
-                bundle.putString("content", outputHashMap.get("content"));
-
-                fragment.setArguments(bundle);
-                fragmentTransaction.replace(R.id.fragment_home, fragment);
-                fragmentTransaction.commit();
+                if (line.getVisibility() == View.GONE) {
+                    line.setVisibility(View.VISIBLE);
+                    content.setVisibility(View.VISIBLE);
+                    notice_change = false;
+                } else {
+                    line.setVisibility(View.GONE);
+                    content.setVisibility(View.GONE);
+                    notice_change = true;
+                }
+//                FragmentManager fm = getFragmentManager();
+//                FragmentTransaction fragmentTransaction = fm.beginTransaction();
+//                NoticeContentFragment fragment = new NoticeContentFragment();
+//
+//                HashMap<String,String> outputHashMap = mArrayList.get(i);
+//                Bundle bundle = new Bundle();
+//                bundle.putString("title", outputHashMap.get("title"));
+//                bundle.putString("content", outputHashMap.get("content"));
+//
+//                fragment.setArguments(bundle);
+//                fragmentTransaction.replace(R.id.fragment_home, fragment);
+//                fragmentTransaction.commit();
             }
         });
 
@@ -202,7 +223,7 @@ public class NoticeBoardFragment extends Fragment {
                 hashMap.put(TAG_TITLE, title);
                 hashMap.put(TAG_CONTENT, content);
 
-                adapter.addItem(title);
+                adapter.addItem(title, content);
                 adapter.notifyDataSetChanged();
 
                 mArrayList.add(hashMap);
@@ -214,6 +235,7 @@ public class NoticeBoardFragment extends Fragment {
 
     public class ListViewItem {
         private String title;
+        private String content;
 
         public void setTitle(String title) {
             this.title = title;
@@ -221,6 +243,14 @@ public class NoticeBoardFragment extends Fragment {
 
         public String getTitle() {
             return this.title;
+        }
+
+        public void setContent(String content) {
+            this.content = content;
+        }
+
+        public String getContent() {
+            return this.content;
         }
     }
 
@@ -241,10 +271,22 @@ public class NoticeBoardFragment extends Fragment {
                 convertView = inflater.inflate(R.layout.listview_notice_board, parent, false);
             }
 
-            TextView titleTextView = (TextView) convertView.findViewById(R.id.title);
+            title = (TextView) convertView.findViewById(R.id.title);
+            line = (LinearLayout) convertView.findViewById(R.id.line);
+            content = (TextView) convertView.findViewById(R.id.content);
+
+            line.setVisibility(View.GONE);
+            content.setVisibility(View.GONE);
+
+            if (!notice_no.equals("") && position == Integer.parseInt(notice_no)) {
+                Toast.makeText(getActivity(), position + ", " + notice_no, Toast.LENGTH_SHORT).show();
+                line.setVisibility(View.VISIBLE);
+                content.setVisibility(View.VISIBLE);
+            }
 
             ListViewItem listViewItem = filteredItemList.get(position); // 아이템 내 각 위젯에 데이터 반영
-            titleTextView.setText(listViewItem.getTitle());
+            title.setText(listViewItem.getTitle());
+            content.setText(listViewItem.getContent());
 
             return convertView;
         }
@@ -259,9 +301,10 @@ public class NoticeBoardFragment extends Fragment {
             return filteredItemList.get(position) ;
         }
 
-        public void addItem(String title) {
+        public void addItem(String title, String content) {
             ListViewItem item = new ListViewItem();
             item.setTitle(title);
+            item.setContent(content);
             listViewItemList.add(item);
         }
     }

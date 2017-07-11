@@ -1,6 +1,8 @@
 package to.oa.farmschedule.farms;
 
 import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -68,6 +70,54 @@ public class HomeFragment extends Fragment {
         layout_notice_1st = (LinearLayout) layout.findViewById(R.id.layout_notice_1st);
         layout_notice_2nd = (LinearLayout) layout.findViewById(R.id.layout_notice_2nd);
         layout_notice_3rd = (LinearLayout) layout.findViewById(R.id.layout_notice_3rd);
+
+        layout_notice_1st.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                FragmentManager fm = getFragmentManager();
+                FragmentTransaction fragmentTransaction = fm.beginTransaction();
+                NoticeBoardFragment fragment = new NoticeBoardFragment();
+
+                Bundle bundle = new Bundle();
+                bundle.putString("no", "0");
+
+                fragment.setArguments(bundle);
+                fragmentTransaction.replace(R.id.fragment_home, fragment);
+                fragmentTransaction.commit();
+            }
+        });
+
+        layout_notice_2nd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                FragmentManager fm = getFragmentManager();
+                FragmentTransaction fragmentTransaction = fm.beginTransaction();
+                NoticeBoardFragment fragment = new NoticeBoardFragment();
+
+                Bundle bundle = new Bundle();
+                bundle.putString("no", "1");
+
+                fragment.setArguments(bundle);
+                fragmentTransaction.replace(R.id.fragment_home, fragment);
+                fragmentTransaction.commit();
+            }
+        });
+
+        layout_notice_3rd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                FragmentManager fm = getFragmentManager();
+                FragmentTransaction fragmentTransaction = fm.beginTransaction();
+                NoticeBoardFragment fragment = new NoticeBoardFragment();
+
+                Bundle bundle = new Bundle();
+                bundle.putString("no", "2");
+
+                fragment.setArguments(bundle);
+                fragmentTransaction.replace(R.id.fragment_home, fragment);
+                fragmentTransaction.commit();
+            }
+        });
 
         notice_1st = (TextView) layout.findViewById(R.id.notice_1st);
         notice_2nd = (TextView) layout.findViewById(R.id.notice_2nd);

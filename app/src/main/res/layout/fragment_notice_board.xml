@@ -54,14 +54,6 @@
             android:layout_height="match_parent"
             android:layout_weight="2">
 
-            <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:gravity="center"
-                android:text="V"
-                android:textSize="20sp"
-                android:textColor="#ffffff"/>
-
         </LinearLayout>
 
         <LinearLayout

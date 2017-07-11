@@ -47,7 +47,12 @@ public class BoardFragment extends Fragment implements View.OnClickListener {
         FragmentTransaction fragmentTransaction = fm.beginTransaction();
 
         if(v.getId() == R.id.notice_board) {
-            fragmentTransaction.replace(R.id.fragment_home, new NoticeBoardFragment());
+            NoticeBoardFragment fragment = new NoticeBoardFragment();
+            Bundle bundle = new Bundle();
+            bundle.putString("no", "");
+
+            fragment.setArguments(bundle);
+            fragmentTransaction.replace(R.id.fragment_home, fragment);
             fragmentTransaction.commit();
         } else if (v.getId() == R.id.work_board) {
             Toast.makeText(getActivity(), "work_board", Toast.LENGTH_SHORT).show();
