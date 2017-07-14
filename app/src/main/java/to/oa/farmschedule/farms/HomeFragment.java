@@ -60,7 +60,7 @@ public class HomeFragment extends Fragment {
 
         mArrayList = new ArrayList<>();
         GetData task = new GetData();
-        task.execute("http://wjdwlsdn0906.host.whoisweb.net/notice_board.php");
+        task.execute("http://wjdwlsdn0906.host.whoisweb.net/php/notice_board.php");
     }
 
     @Override

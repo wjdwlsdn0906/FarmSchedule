@@ -59,7 +59,8 @@ public class BoardFragment extends Fragment implements View.OnClickListener {
         } else if (v.getId() == R.id.trade_board) {
             Toast.makeText(getActivity(), "trade_board", Toast.LENGTH_SHORT).show();
         } else if (v.getId() == R.id.qna_board) {
-            Toast.makeText(getActivity(), "qna_board", Toast.LENGTH_SHORT).show();
+            fragmentTransaction.replace(R.id.fragment_home, new QnaBoardFragment());
+            fragmentTransaction.commit();
         }
     }
 
