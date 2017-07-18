@@ -31,6 +31,7 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -45,17 +46,15 @@ public class QnaContentBoardFragment extends Fragment {
     private static String TAG = "phptest_MainActivity";
 
     private static final String TAG_JSON="webnautes";
-    private static final String TAG_NO = "no";
     private static final String TAG_ID = "id";
-    private static final String TAG_TITLE = "title";
-    private static final String TAG_CONTENT ="content";
+    private static final String TAG_COMMENT ="comment";
 
     private View layout;
     private LinearLayout back, line;
     private ListView listview;
     private ListViewAdapter adapter;
-    private TextView title, content;
-    private String notice_no = "";
+    private TextView title, content, id, comment;
+    private String qna_no, qna_title, qna_content;
     private String mJsonString;
     private ArrayList<HashMap<String, String>> mArrayList;
 
@@ -68,19 +67,31 @@ public class QnaContentBoardFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         try {
-            notice_no = (String) getArguments().getString("no");
+            qna_no = (String) getArguments().getString("no");
         } catch (Exception e) {
-            notice_no = "";
+            qna_no = "";
+        }
+
+        try {
+            qna_title = (String) getArguments().getString("title");
+        } catch (Exception e) {
+            qna_title = "";
+        }
+
+        try {
+            qna_content = (String) getArguments().getString("content");
+        } catch (Exception e) {
+            qna_content = "";
         }
 
         mArrayList = new ArrayList<>();
         GetData task = new GetData();
-        task.execute("http://wjdwlsdn0906.host.whoisweb.net/php/qna_board.php");
+        task.execute("http://wjdwlsdn0906.host.whoisweb.net/php/qna_board_comment.php");
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        layout = inflater.inflate(R.layout.fragment_qna_board, container, false);
+        layout = inflater.inflate(R.layout.fragment_qna_content_board, container, false);
 
         back = (LinearLayout) layout.findViewById(R.id.back);
         back.setOnClickListener(new View.OnClickListener() {
@@ -88,56 +99,31 @@ public class QnaContentBoardFragment extends Fragment {
             public void onClick(View view) {
                 FragmentManager fm = getFragmentManager();
                 FragmentTransaction fragmentTransaction = fm.beginTransaction();
-                fragmentTransaction.replace(R.id.fragment_home, new BoardFragment());
+                fragmentTransaction.replace(R.id.fragment_home, new QnaBoardFragment());
                 fragmentTransaction.commit();
             }
         });
 
+        title = (TextView) layout.findViewById(R.id.title);
+        title.setText(qna_title);
+        content = (TextView) layout.findViewById(R.id.content);
+        content.setText(qna_content);
+
         adapter = new ListViewAdapter();
-        listview = (ListView) layout.findViewById(R.id.qna_board);
+        listview = (ListView) layout.findViewById(R.id.comment_board);
         listview.setAdapter(adapter);
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-//                FragmentManager fm = getFragmentManager();
-//                FragmentTransaction fragmentTransaction = fm.beginTransaction();
-//                NoticeContentFragment fragment = new NoticeContentFragment();
-//
-//                HashMap<String,String> outputHashMap = mArrayList.get(i);
-//                Bundle bundle = new Bundle();
-//                bundle.putString("title", outputHashMap.get("title"));
-//                bundle.putString("content", outputHashMap.get("content"));
-//
-//                fragment.setArguments(bundle);
-//                fragmentTransaction.replace(R.id.fragment_home, fragment);
-//                fragmentTransaction.commit();
+                // TODO
             }
         });
 
-        final EditText editTextFilter = (EditText) layout.findViewById(R.id.searchFilter);
-        editTextFilter.addTextChangedListener(new TextWatcher() {
+        final EditText editText = (EditText) layout.findViewById(R.id.searchFilter);
+        editText.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void afterTextChanged(Editable edit) {
-                String filterText = edit.toString();
-                ((ListViewAdapter) listview.getAdapter()).getFilter().filter(filterText) ;
-            }
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) { }
-        });
-        editTextFilter.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                switch (actionId) {
-                    default:
-                        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                        imm.hideSoftInputFromWindow(editTextFilter.getWindowToken(), 0);
-                        break;
-                }
-                return true;
+            public void onClick(View view) {
+                Toast.makeText(getActivity(), ""+editText.getText(), Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -165,7 +151,6 @@ public class QnaContentBoardFragment extends Fragment {
             }
             else {
                 mJsonString = result;
-                Log.e("test" , mJsonString);
                 showResult();
             }
         }
@@ -175,14 +160,21 @@ public class QnaContentBoardFragment extends Fragment {
         protected String doInBackground(String... params) {
 
             String serverURL = params[0];
+            String postParameters = "no=" + qna_no;
 
             try  {
                 URL url = new URL(serverURL);
                 HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
                 httpURLConnection.setReadTimeout(5000);
                 httpURLConnection.setConnectTimeout(5000);
+                httpURLConnection.setRequestMethod("POST"); // POST
+                httpURLConnection.setDoInput(true); // POST
                 httpURLConnection.connect();
 
+                OutputStream outputStream = httpURLConnection.getOutputStream();
+                outputStream.write(postParameters.getBytes("UTF-8"));
+                outputStream.flush();
+                outputStream.close();
 
                 int responseStatusCode = httpURLConnection.getResponseCode();
                 Log.d(TAG, "response code - " + responseStatusCode);
@@ -211,7 +203,7 @@ public class QnaContentBoardFragment extends Fragment {
 
             } catch (Exception e) {
 
-                Log.d(TAG, "InsertData: Error ", e);
+                Log.d(TAG, "GetData: Error ", e);
                 errorString = e.toString();
 
                 return null;
@@ -228,19 +220,15 @@ public class QnaContentBoardFragment extends Fragment {
 
                 JSONObject item = jsonArray.getJSONObject(i);
 
-                String no = "" + item.getInt(TAG_NO);
                 String id = item.getString(TAG_ID);
-                String title = item.getString(TAG_TITLE);
-                String content = item.getString(TAG_CONTENT);
+                String comment = item.getString(TAG_COMMENT);
 
                 HashMap<String,String> hashMap = new HashMap<>();
 
-                hashMap.put(TAG_NO, no);
                 hashMap.put(TAG_ID, id);
-                hashMap.put(TAG_TITLE, title);
-                hashMap.put(TAG_CONTENT, content);
+                hashMap.put(TAG_COMMENT, comment);
 
-                adapter.addItem(no, id, title, content);
+                adapter.addItem(id, comment);
                 adapter.notifyDataSetChanged();
 
                 mArrayList.add(hashMap);
@@ -251,37 +239,23 @@ public class QnaContentBoardFragment extends Fragment {
     }
 
     public class ListViewItem {
-        private String no;
         private String id;
-        private String title;
-        private String content;
-
-        public void setNo(String no) { this.no = no; }
-
-        public String getNo() { return this.no; }
+        private String comment;
 
         public void setId(String id) { this.id = id; }
 
         public String getId() { return this.id; }
 
-        public void setTitle(String title) {
-            this.title = title;
+        public void setComment(String comment) {
+            this.comment = comment;
         }
 
-        public String getTitle() {
-            return this.title;
-        }
-
-        public void setContent(String content) {
-            this.content = content;
-        }
-
-        public String getContent() {
-            return this.content;
+        public String getComment() {
+            return this.comment;
         }
     }
 
-    public class ListViewAdapter extends BaseAdapter implements Filterable {
+    public class ListViewAdapter extends BaseAdapter {
 
         private Filter listFilter;
         private ArrayList<ListViewItem> listViewItemList = new ArrayList<ListViewItem>() ;
@@ -296,13 +270,17 @@ public class QnaContentBoardFragment extends Fragment {
             final Context context = parent.getContext(); // "listview_item" Layout을 inflate하여 convertView 참조 획득.
 
             if (convertView == null) { LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                convertView = inflater.inflate(R.layout.listview_qna_board, parent, false);
+                convertView = inflater.inflate(R.layout.listview_qna_comment, parent, false);
             }
 
-            title = (TextView) convertView.findViewById(R.id.title);
+            id = (TextView) convertView.findViewById(R.id.id);
+            comment = (TextView) convertView.findViewById(R.id.comment);
 
             ListViewItem listViewItem = filteredItemList.get(position); // 아이템 내 각 위젯에 데이터 반영
-            title.setText(listViewItem.getTitle());
+            id.setText(listViewItem.getId());
+            comment.setText(listViewItem.getComment());
+
+            Log.w("test", "요기");
 
             return convertView;
         }
@@ -317,51 +295,11 @@ public class QnaContentBoardFragment extends Fragment {
             return filteredItemList.get(position) ;
         }
 
-        public void addItem(String no, String id, String title, String content) {
+        public void addItem(String id, String comment) {
             ListViewItem item = new ListViewItem();
-            item.setNo(no);
             item.setId(id);
-            item.setTitle(title);
-            item.setContent(content);
+            item.setComment(comment);
             listViewItemList.add(item);
-        }
-
-        @Override
-        public Filter getFilter() {
-            if (listFilter == null) {
-                listFilter = new ListFilter();
-            }
-            return listFilter;
-        }
-
-        private class ListFilter extends Filter {
-            @Override
-            protected FilterResults performFiltering(CharSequence constraint) {
-                FilterResults results = new FilterResults();
-                if (constraint == null || constraint.length() == 0) {
-                    results.values = listViewItemList;
-                    results.count = listViewItemList.size();
-                } else {
-                    ArrayList<ListViewItem> itemList = new ArrayList<ListViewItem>();
-                    for (ListViewItem item : listViewItemList) {
-                        if (item.getTitle().toUpperCase().contains(constraint.toString().toUpperCase()) || item.getTitle().toUpperCase().contains(constraint.toString().toUpperCase())) {
-                            itemList.add(item);
-                        }
-                    }
-                    results.values = itemList;
-                    results.count = itemList.size();
-                }
-                return results;
-            }
-
-            @Override
-            protected void publishResults(CharSequence constraint, FilterResults results) { // update listview by filtered data list.
-                filteredItemList = (ArrayList<ListViewItem>) results.values ; // notify
-                if (results.count > 0) { notifyDataSetChanged() ;
-                } else {
-                    notifyDataSetInvalidated();
-                }
-            }
         }
     }
 }
